@@ -118,3 +118,7 @@ RemoveFromGroup -Target user -Group "Domain Admins"
 ```
 RemoveFromGroup -Target user -Group "Domain Admins" -Domain userdomain
 ```
+
+## Shadow Credentials
+
+https://github.com/Leo4j/KeyCredentialLink
