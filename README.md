@@ -119,6 +119,14 @@ RemoveFromGroup -Target user -Group "Domain Admins"
 RemoveFromGroup -Target user -Group "Domain Admins" -Domain userdomain
 ```
 
+## Modify or clear a property for an object
+```
+Set-DomainObject -Identity user -Set @{'userprincipalname' = "user@domain.com"}
+```
+```
+Set-DomainObject -Identity user -Clear 'userprincipalname'
+```
+
 ## Shadow Credentials
 
 https://github.com/Leo4j/KeyCredentialLink
