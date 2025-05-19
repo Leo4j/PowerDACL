@@ -412,6 +412,16 @@ function AddComputer {
 		$newComputer = $computersContainer.Create("Computer", "CN=$ComputerName")
 		
 		$newComputer.Put("sAMAccountName", "$ComputerName`$")
+  		$newComputer.Put("userAccountControl", 4096)
+		$newComputer.Put("dNSHostName",  "$ComputerName.$Domain")
+		
+		$spns = @(
+			"HOST/$ComputerName.$Domain",
+			"RestrictedKrbHost/$ComputerName.$Domain",
+			"HOST/$ComputerName",
+			"RestrictedKrbHost/$ComputerName"
+		)
+		$newComputer.Put("servicePrincipalName", $spns)
 		
 		$newComputer.SetInfo()
 		
