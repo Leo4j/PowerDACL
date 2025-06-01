@@ -425,9 +425,14 @@ function AddComputer {
 		
 		$newComputer.SetInfo()
 		
-		([ADSI]"LDAP://CN=$ComputerName,CN=Computers,$domainDN").SetPassword($Password)
-		
-		Write-Output "[+] Successfully added computer $ComputerName to the domain with password $Password"
+		if($Password){
+			([ADSI]"LDAP://CN=$ComputerName,CN=Computers,$domainDN").SetPassword($Password)
+			
+			Write-Output "[+] Successfully added computer $ComputerName to the domain with password $Password"
+		}
+		else{
+			Write-Output "[+] Successfully added computer $ComputerName to the domain with empty password"
+		}
 	}
 	
 	catch {
