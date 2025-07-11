@@ -408,52 +408,67 @@ function DisableAccount {
 }
 
 function AddComputer {
-	param (
+    [CmdletBinding()]
+    param (
         [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
-		[string]$ComputerName,
+        [string]$ComputerName,
+        [Parameter (Mandatory=$False)]
         [string]$Password,
-		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
         [string]$Domain,
-		[Parameter (Mandatory=$True, ValueFromPipeline=$true)]
-		[string]$Server
+        [Parameter (Mandatory=$True, ValueFromPipeline=$true)]
+        [string]$Server
     )
-	
-	$domainDN = $Domain -replace '\.', ',DC='
-	$domainDN = "DC=$domainDN"
-	
-	try{
-	
-		$computersContainer = [ADSI]"LDAP://$Server/CN=Computers,$domainDN"
-		
-		$newComputer = $computersContainer.Create("Computer", "CN=$ComputerName")
-		
-		$newComputer.Put("sAMAccountName", "$ComputerName`$")
-  		$newComputer.Put("userAccountControl", 4096)
-		$newComputer.Put("dNSHostName",  "$ComputerName.$Domain")
-		
-		$spns = @(
-			"HOST/$ComputerName.$Domain",
-			"RestrictedKrbHost/$ComputerName.$Domain",
-			"HOST/$ComputerName",
-			"RestrictedKrbHost/$ComputerName"
-		)
-		$newComputer.Put("servicePrincipalName", $spns)
-		
-		$newComputer.SetInfo()
-		
-		if($Password){
-			([ADSI]"LDAP://$Server/CN=$ComputerName,CN=Computers,$domainDN").SetPassword($Password)
-			
-			Write-Output "[+] Successfully added computer $ComputerName to the domain with password $Password"
-		}
-		else{
-			Write-Output "[+] Successfully added computer $ComputerName to the domain with empty password"
-		}
-	}
-	
-	catch {
-		Write-Output "[-] Error occurred while adding computer $ComputerName to domain: $_"
-	}
+
+    try {
+        # Handle password
+        if(!$Password){
+            $Password = -join ((33..126) | Get-Random -Count 16 | ForEach-Object {[char]$_})
+            Write-Verbose "[*] No password provided. Generated: $Password"
+        }
+
+        $quotedPassword = '"' + $Password + '"'
+        $unicodePwd = [System.Text.Encoding]::Unicode.GetBytes($quotedPassword)
+
+        # Build DN
+        $domainDN = "DC=" + ($Domain -replace '\.', ',DC=')
+        $distinguishedName = "CN=$ComputerName,CN=Computers,$domainDN"
+
+        $samAccountName = "$ComputerName$"
+        $dnsHostName = "$ComputerName.$Domain"
+        $spns = @(
+            "HOST/$dnsHostName",
+            "RestrictedKrbHost/$dnsHostName",
+            "HOST/$ComputerName",
+            "RestrictedKrbHost/$ComputerName"
+        )
+
+        # Load assembly
+        Add-Type -AssemblyName System.DirectoryServices.Protocols
+
+        $identifier = New-Object System.DirectoryServices.Protocols.LdapDirectoryIdentifier($Server, 389)
+        $connection = New-Object System.DirectoryServices.Protocols.LdapConnection($identifier)
+
+        $connection.SessionOptions.Sealing = $true
+        $connection.SessionOptions.Signing = $true
+        $connection.Bind()
+
+        $request = New-Object System.DirectoryServices.Protocols.AddRequest
+        $request.DistinguishedName = $distinguishedName
+        $request.Attributes.Add((New-Object System.DirectoryServices.Protocols.DirectoryAttribute("objectClass", "Computer"))) | Out-Null
+        $request.Attributes.Add((New-Object System.DirectoryServices.Protocols.DirectoryAttribute("sAMAccountName", $samAccountName))) | Out-Null
+        $request.Attributes.Add((New-Object System.DirectoryServices.Protocols.DirectoryAttribute("userAccountControl", "4096"))) | Out-Null
+        $request.Attributes.Add((New-Object System.DirectoryServices.Protocols.DirectoryAttribute("dNSHostName", $dnsHostName))) | Out-Null
+        $request.Attributes.Add((New-Object System.DirectoryServices.Protocols.DirectoryAttribute("servicePrincipalName", $spns))) | Out-Null
+        $request.Attributes.Add((New-Object System.DirectoryServices.Protocols.DirectoryAttribute("unicodePwd", $unicodePwd))) | Out-Null
+
+        $connection.SendRequest($request) | Out-Null
+
+        Write-Output "[+] Successfully added computer $ComputerName to the domain with password $Password"
+    }
+    catch {
+        Write-Output "[-] Error occurred while adding computer $ComputerName to domain: $_"
+    }
 }
 
 function DeleteComputer {
